@@ -113,31 +113,9 @@ function EonLash:INSPECT_READY(event, guid)
     self:UnregisterEvent("INSPECT_READY")
 
 
-    -- format data to be displayed on the UI
-    local scanContent = string.format([[
-playerGuid: %s,
-scanType: %s,
-timeStamp: %s,
-targetName: %s,
-realmName: %s,
-targetLevel: %d,
-targetPvpTitle: %s,
-targetRace: %s,
-targetGender: %d,
-targetClass: %s,
-targetGuild: %s,
-targetGuildRank: %s,
-targetInventory: %s,
-targetTalent: %s,
-targetRune: %s,
-inspectUnitId: %s]], playerEntry.playerGuid, playerEntry.scanType, playerEntry.timeStamp,
-            playerEntry.targetName, playerEntry.realmName, playerEntry.targetLevel, playerEntry.targetPvpTitle,
-            playerEntry.targetRace, playerEntry.targetGender, playerEntry.targetClass,
-            playerEntry.targetGuild, playerEntry.targetGuildRank, playerEntry.targetInventory,
-            playerEntry.targetTalent, playerEntry.targetRune, playerEntry.inspectUnitId)
-
     if playerEntry.inspectUnitId == "player" then
-      self:DisplaySelfScan(scanContent)
+      -- self:DisplaySelfScan(playerEntry)
+      self:DisplaySelfScanEncoded(playerEntry)
     end
   end
 end
