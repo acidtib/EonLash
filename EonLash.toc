@@ -4,7 +4,7 @@
 ## Notes: Armory Scanner for eonlash.com
 ## Author: acidtib
 ## OptionalDeps: Ace3, LibStub, CallbackHandler-1.0, LibDBIcon-1.0, LibDataBroker-1.1
-## SavedVariables: EonLashDB
+## SavedVariables: EonLashDB, EonLashBeeper
 
 embeds.xml
 

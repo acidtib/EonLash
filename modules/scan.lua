@@ -1,11 +1,11 @@
 EonLash = LibStub("AceAddon-3.0"):GetAddon("EonLash")
 
+-- whats the current realm name
 local serverName = GetRealmName()
-
 
 -- grab target player details
 function EonLash:ScanPlayerDetails(playerGuid, unitId)
-  local playerEntry = DB:Get(playerGuid)
+  local playerEntry = self:DBGet(playerGuid)
 
   playerEntry.targetLevel = UnitLevel(unitId)
   playerEntry.targetRace = UnitRace(unitId)
@@ -31,7 +31,7 @@ function EonLash:ScanPlayerDetails(playerGuid, unitId)
   playerEntry.targetPvpTitle = targetPvpTitle
 
   -- save to database
-  DB:Add(playerGuid, playerEntry)
+  self:DBAdd(playerGuid, playerEntry)
 end
 
 -- inspect a target
@@ -42,7 +42,7 @@ end
 
 -- handle INSPECT_READY event
 function EonLash:INSPECT_READY(event, guid)
-  local playerEntry = DB:Get(guid)
+  local playerEntry = self:DBGet(guid)
 
   if playerEntry then
 
@@ -108,7 +108,7 @@ function EonLash:INSPECT_READY(event, guid)
     playerEntry.targetRune = targetRune
     playerEntry.scanType = "FULL"
 
-    DB:Add(playerEntry.playerGuid, playerEntry)
+    self:DBAdd(playerEntry.playerGuid, playerEntry)
 
     self:UnregisterEvent("INSPECT_READY")
 
@@ -123,6 +123,7 @@ end
 -- scan player and display frame with data
 function EonLash:ScanPlayer(unitId)
   if CanInspect(unitId) and CheckInteractDistance(unitId, 1) then
+    -- default data
     local payload = {
       playerGuid = "",
       inspectUnitId = "player",
@@ -147,9 +148,9 @@ function EonLash:ScanPlayer(unitId)
     payload.inspectUnitId = unitId
 
     -- save partial record early
-    DB:Add(payload.playerGuid, payload)
+    self:DBAdd(payload.playerGuid, payload)
 
-    self:Print("Scanning " .. payload.targetName)
+    self:Print("Scanning: " .. payload.targetName)
 
     self:ScanPlayerDetails(payload.playerGuid, unitId)
     self:ScanInspectPlayer(unitId)

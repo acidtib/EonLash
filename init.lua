@@ -2,10 +2,6 @@
 --you want to use as trailing parameters in :NewAddon()
 EonLash = LibStub("AceAddon-3.0"):NewAddon("EonLash", "AceEvent-3.0", "AceConsole-3.0")
 
-EonLash.scanner = {}
-
-EonLash.db = {}
-
 -- Addon comms prefix
 EonLash.prefix = "eonlash";
 
