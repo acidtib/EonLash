@@ -88,6 +88,7 @@ function EonLash:INSPECT_READY(event, guid)
     end
 
     -- grab character active runes
+    -- TODO: this is not 100% of the time
     local supportedSlots = { [5] = "Chest", [7] = "Legs", [10] = "Hands" }
     local targetRune = ""
 
@@ -114,8 +115,11 @@ function EonLash:INSPECT_READY(event, guid)
 
 
     if playerEntry.inspectUnitId == "player" then
-      -- self:DisplaySelfScan(playerEntry)
-      self:DisplaySelfScanEncoded(playerEntry)
+      if EonLashDataFormat == "TEXT" then
+        self:DisplaySelfScanText(playerEntry)
+      else
+        self:DisplaySelfScanEncoded(playerEntry)
+      end
     end
   end
 end

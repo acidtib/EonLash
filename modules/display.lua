@@ -1,6 +1,6 @@
 EonLash = LibStub("AceAddon-3.0"):GetAddon("EonLash")
 
-function EonLash:DisplaySelfScan(playerEntry)
+function EonLash:DisplaySelfScanText(playerEntry)
   -- format data to be displayed on the UI
   local scanContent = string.format([[playerGuid: %s,scanType: %s,timeStamp: %s,targetName: %s,realmName: %s,targetLevel: %d,targetPvpTitle: %s,targetRace: %s,targetGender: %d,targetClass: %s,targetGuild: %s,targetGuildRank: %s,targetInventory: %s,targetTalent: %s,targetRune: %s,inspectUnitId: %s]], playerEntry.playerGuid, playerEntry.scanType, playerEntry.timeStamp,
   playerEntry.targetName, playerEntry.realmName, playerEntry.targetLevel, playerEntry.targetPvpTitle,
@@ -11,7 +11,7 @@ function EonLash:DisplaySelfScan(playerEntry)
   -- Create a frame to hold the EditBox
   local frame = AceGUI:Create("Frame")
   frame:SetTitle("EonLash")
-  frame:SetStatusText("Press CTRL/C to copy and Paste at https://eonlash.com")
+  frame:SetStatusText("Press CTRL/C to copy")
   frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
   frame:SetLayout("Fill")
 

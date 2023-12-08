@@ -10,6 +10,7 @@ function EonLash:OnEnable()
   -- clean out the database
   EonLashDB = {}
   EonLashBeeper = false
+  EonLashDataFormat = "BASE64"
 
   -- self:RegisterEvent("PLAYER_STARTED_MOVING")
   self:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
@@ -49,6 +50,12 @@ function EonLash:SlashCommand(msg)
     -- toggle off, scan players when mouse over
     self:Print("Scanning has been disabled. You will no longer automatically scan players you interact with.");
 		EonLashBeeper = false;
+
+  elseif msg == "clear" then
+    -- /eon clean
+    -- scan current player and display info in raw text
+    EonLashDataFormat = "TEXT"
+    self:ScanPlayer("player")
 	else
     -- /eon command default
     -- scan current player and display info
