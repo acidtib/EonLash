@@ -1,0 +1,17 @@
+## Interface: 11500
+## Version: 1.0.0
+## Title: EonLash|cFF00FF00 v1.0.0|r
+## Notes: Armory Scanner for eonlash.com
+## Author: acidtib
+## OptionalDeps: Ace3, LibStub, CallbackHandler-1.0, LibDBIcon-1.0, LibDataBroker-1.1
+## SavedVariables: EonLashDB
+
+embeds.xml
+
+init.lua
+
+modules\database.lua
+modules\scan.lua
+modules\display.lua
+
+EonLash.lua
