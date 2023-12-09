@@ -36,8 +36,8 @@ end
 
 -- inspect a target
 function EonLash:ScanInspectPlayer(unitId)
-  NotifyInspect(unitId)
   self:RegisterEvent("INSPECT_READY")
+  NotifyInspect(unitId)
 end
 
 -- handle INSPECT_READY event
@@ -63,31 +63,6 @@ function EonLash:INSPECT_READY(event, guid)
         targetTalent = string.format("%s]", targetTalent)
       end
 
-      -- grab player active gear
-      local targetInventory = ""
-
-      for i = 1, 19, 1 do
-        local itemId = GetInventoryItemID(playerEntry.inspectUnitId, i)
-        local link = GetInventoryItemLink(playerEntry.inspectUnitId, i)
-        local enchantId = 0
-
-        if not (link == null) then
-          --local _, enchantId, gem1, gem2, gem3, gem4 = link:match("item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)");
-          local _, _, Color, Ltype, Id, Enchant, Gem1, Gem2, Gem3, Gem4, Suffix, Unique, LinkLvl, Name = string.find(link, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
-          enchantId = tonumber(Enchant)
-
-          if enchantId == nil then
-            enchantId = 0
-          end
-        end
-
-        if targetInventory == "" then
-          targetInventory = format("%d:%d", itemId, enchantId)
-        else
-          targetInventory = format("%s %d:%d", targetInventory, itemId, enchantId)
-        end
-      end
-
       -- grab character active runes
       -- TODO: this is not 100% of the time
       local supportedSlots = { [5] = "Chest", [7] = "Legs", [10] = "Hands" }
@@ -105,15 +80,41 @@ function EonLash:INSPECT_READY(event, guid)
         end
       end
 
-      playerEntry.targetTalent = targetTalent
-      playerEntry.targetInventory = targetInventory
+      playerEntry.targetTalent = targetTalent      
       playerEntry.targetRune = targetRune
       playerEntry.scanType = "FULL"
 
       self:DBAdd(playerEntry.playerGuid, playerEntry)
     end
 
-    -- self:UnregisterEvent("INSPECT_READY")
+    -- grab player active gear
+    local targetInventory = ""
+
+    for i = 1, 19, 1 do
+      local itemId = GetInventoryItemID(playerEntry.inspectUnitId, i)
+      local link = GetInventoryItemLink(playerEntry.inspectUnitId, i)
+      local enchantId = 0
+
+      if not (link == null) then
+        --local _, enchantId, gem1, gem2, gem3, gem4 = link:match("item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)");
+        local _, _, Color, Ltype, Id, Enchant, Gem1, Gem2, Gem3, Gem4, Suffix, Unique, LinkLvl, Name = string.find(link, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
+        enchantId = tonumber(Enchant)
+
+        if enchantId == nil then
+          enchantId = 0
+        end
+      end
+
+      if targetInventory == "" then
+        targetInventory = format("%d:%d", itemId, enchantId)
+      else
+        targetInventory = format("%s %d:%d", targetInventory, itemId, enchantId)
+      end
+    end
+
+    playerEntry.targetInventory = targetInventory
+
+    self:UnregisterEvent("INSPECT_READY")
 
     if playerEntry.inspectUnitId == "player" then
       if EonLashDataFormat == "TEXT" then
@@ -150,8 +151,10 @@ function EonLash:ScanPlayer(unitId)
 
     payload.playerGuid = UnitGUID(unitId)
 
+    local currentCheck = self:DBGet(payload.playerGuid)
+
     -- only scan if player is missing from local db
-    if self:DBGet(payload.playerGuid) then
+    if currentCheck and currentCheck.inspectUnitId == "mouseover" then
       do return end
     end
 
