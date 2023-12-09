@@ -46,73 +46,74 @@ function EonLash:INSPECT_READY(event, guid)
 
   if playerEntry then
 
-    -- grab player talents
-    local numTabs = GetNumTalentTabs()
-    local targetTalent = ""
+    if playerEntry.inspectUnitId == "player" then
+      -- grab player talents
+      local numTabs = GetNumTalentTabs()
+      local targetTalent = ""
 
-    for t=1, numTabs do
-      targetTalent = string.format("%s%s[", targetTalent, GetTalentTabInfo(t))
+      for t=1, numTabs do
+        targetTalent = string.format("%s%s[", targetTalent, GetTalentTabInfo(t))
 
-      local numTalents = GetNumTalents(t)
-      for i=1, numTalents do
-        name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(t, i)
-        local talent_entry = string.format("%s:%s:%d:%d:%d:%d--", name, iconPath, tier, column, currentRank, maxRank)
-        targetTalent = string.format("%s%s", targetTalent, talent_entry)
-      end	
-      targetTalent = string.format("%s]", targetTalent)
-    end
+        local numTalents = GetNumTalents(t)
+        for i=1, numTalents do
+          name, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(t, i)
+          local talent_entry = string.format("%s:%s:%d:%d:%d:%d--", name, iconPath, tier, column, currentRank, maxRank)
+          targetTalent = string.format("%s%s", targetTalent, talent_entry)
+        end	
+        targetTalent = string.format("%s]", targetTalent)
+      end
 
-    -- grab player active gear
-    local targetInventory = ""
+      -- grab player active gear
+      local targetInventory = ""
 
-    for i = 1, 19, 1 do
-      local itemId = GetInventoryItemID(playerEntry.inspectUnitId, i)
-      local link = GetInventoryItemLink(playerEntry.inspectUnitId, i)
-      local enchantId = 0
+      for i = 1, 19, 1 do
+        local itemId = GetInventoryItemID(playerEntry.inspectUnitId, i)
+        local link = GetInventoryItemLink(playerEntry.inspectUnitId, i)
+        local enchantId = 0
 
-      if not (link == null) then
-        --local _, enchantId, gem1, gem2, gem3, gem4 = link:match("item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)");
-        local _, _, Color, Ltype, Id, Enchant, Gem1, Gem2, Gem3, Gem4, Suffix, Unique, LinkLvl, Name = string.find(link, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
-        enchantId = tonumber(Enchant)
+        if not (link == null) then
+          --local _, enchantId, gem1, gem2, gem3, gem4 = link:match("item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)");
+          local _, _, Color, Ltype, Id, Enchant, Gem1, Gem2, Gem3, Gem4, Suffix, Unique, LinkLvl, Name = string.find(link, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*):?(%-?%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
+          enchantId = tonumber(Enchant)
 
-        if enchantId == nil then
-          enchantId = 0
+          if enchantId == nil then
+            enchantId = 0
+          end
+        end
+
+        if targetInventory == "" then
+          targetInventory = format("%d:%d", itemId, enchantId)
+        else
+          targetInventory = format("%s %d:%d", targetInventory, itemId, enchantId)
         end
       end
 
-      if targetInventory == "" then
-        targetInventory = format("%d:%d", itemId, enchantId)
-      else
-        targetInventory = format("%s %d:%d", targetInventory, itemId, enchantId)
+      -- grab character active runes
+      -- TODO: this is not 100% of the time
+      local supportedSlots = { [5] = "Chest", [7] = "Legs", [10] = "Hands" }
+      local targetRune = ""
+
+      for slot, name in pairs(supportedSlots) do
+        local activeRune = C_Engraving.GetRuneForEquipmentSlot(slot)
+        if activeRune then
+          targetRune = string.format("%s%s[", targetRune, name)
+
+          local runeEntry = string.format("%s:%s:%s:%s--", activeRune.name, activeRune.learnedAbilitySpellIDs[1], activeRune.level, activeRune.iconTexture)
+          targetRune = string.format("%s%s", targetRune, runeEntry)
+
+          targetRune = string.format("%s]", targetRune)
+        end
       end
+
+      playerEntry.targetTalent = targetTalent
+      playerEntry.targetInventory = targetInventory
+      playerEntry.targetRune = targetRune
+      playerEntry.scanType = "FULL"
+
+      self:DBAdd(playerEntry.playerGuid, playerEntry)
     end
 
-    -- grab character active runes
-    -- TODO: this is not 100% of the time
-    local supportedSlots = { [5] = "Chest", [7] = "Legs", [10] = "Hands" }
-    local targetRune = ""
-
-    for slot, name in pairs(supportedSlots) do
-      local activeRune = C_Engraving.GetRuneForEquipmentSlot(slot)
-      if activeRune then
-        targetRune = string.format("%s%s[", targetRune, name)
-
-        local runeEntry = string.format("%s:%s:%s:%s--", activeRune.name, activeRune.learnedAbilitySpellIDs[1], activeRune.level, activeRune.iconTexture)
-        targetRune = string.format("%s%s", targetRune, runeEntry)
-
-        targetRune = string.format("%s]", targetRune)
-      end
-    end
-
-    playerEntry.targetTalent = targetTalent
-    playerEntry.targetInventory = targetInventory
-    playerEntry.targetRune = targetRune
-    playerEntry.scanType = "FULL"
-
-    self:DBAdd(playerEntry.playerGuid, playerEntry)
-
-    self:UnregisterEvent("INSPECT_READY")
-
+    -- self:UnregisterEvent("INSPECT_READY")
 
     if playerEntry.inspectUnitId == "player" then
       if EonLashDataFormat == "TEXT" then
@@ -148,6 +149,13 @@ function EonLash:ScanPlayer(unitId)
     }
 
     payload.playerGuid = UnitGUID(unitId)
+
+    -- only scan if player is missing from local db
+    if self:DBGet(payload.playerGuid) then
+      do return end
+    end
+
+
     payload.targetName = UnitName(unitId)
     payload.inspectUnitId = unitId
 
